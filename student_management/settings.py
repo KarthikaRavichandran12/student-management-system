@@ -8,7 +8,12 @@ SECRET_KEY = "django-insecure-development-key-change-me-before-deploying"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "testserver",
+    ".onrender.com",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
