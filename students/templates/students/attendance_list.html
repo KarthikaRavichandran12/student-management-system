@@ -1,0 +1,121 @@
+{% extends "students/base.html" %}
+{% block title %}Attendance - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Attendance</h1>
+    <p class="page-subtitle">Track daily attendance and review past records.</p>
+  </div>
+  <div class="heading-actions">
+    <a href="{% url 'students:attendance_bulk_mark' %}" class="btn btn-primary">+ Mark attendance</a>
+    <a href="{% url 'students:attendance_create' %}" class="btn btn-secondary">Add single record</a>
+  </div>
+</div>
+
+<section class="card">
+  <div class="summary-strip">
+    <div class="summary-item"><span>Total records</span><strong>{{ summary.total }}</strong></div>
+    <div class="summary-item"><span>Present / late</span><strong>{{ summary.present }}</strong></div>
+    <div class="summary-item"><span>Absent</span><strong>{{ summary.absent }}</strong></div>
+    <div class="summary-item"><span>Attendance rate</span><strong>{{ summary.percentage|floatformat:1|default:"—" }}{% if summary.percentage %}%{% endif %}</strong></div>
+  </div>
+
+  <form method="get" class="filter-bar">
+    <div class="filter-field">
+      <label for="course" class="sr-only">Course</label>
+      <select id="course" name="course">
+        <option value="">All courses</option>
+        {% for course in courses %}
+          <option value="{{ course.pk }}" {% if course_id == course.pk|stringformat:"s" %}selected{% endif %}>{{ course.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="student" class="sr-only">Student</label>
+      <select id="student" name="student">
+        <option value="">All students</option>
+        {% for student in students %}
+          <option value="{{ student.pk }}" {% if student_id == student.pk|stringformat:"s" %}selected{% endif %}>{{ student.name }} ({{ student.roll_number }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="status" class="sr-only">Status</label>
+      <select id="status" name="status">
+        <option value="">All statuses</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="from" class="sr-only">From date</label>
+      <input type="date" id="from" name="from" value="{{ date_from }}">
+    </div>
+    <div class="filter-field">
+      <label for="to" class="sr-only">To date</label>
+      <input type="date" id="to" name="to" value="{{ date_to }}">
+    </div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    {% if course_id or student_id or status or date_from or date_to %}
+      <a href="{% url 'students:attendance_list' %}" class="btn btn-link">Clear</a>
+    {% endif %}
+  </form>
+
+  {% if records %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Note</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in records %}
+            <tr>
+              <td class="strong-cell"><a class="table-link" href="{% url 'students:student_detail' record.student_id %}">{{ record.student.name }}</a><br><small class="mono">{{ record.student.roll_number }}</small></td>
+              <td><span class="course-tag">{{ record.student.course.code }}</span></td>
+              <td>{{ record.date|date:"M d, Y" }}</td>
+              <td><span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span></td>
+              <td class="description-cell">{{ record.notes|default:"—" }}</td>
+              <td class="table-actions">
+                <a href="{% url 'students:attendance_update' record.pk %}" class="btn-icon">Edit</a>
+                <a href="{% url 'students:attendance_delete' record.pk %}" class="btn-icon btn-icon-danger">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <p class="pagination-info">
+        Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+      </p>
+      <nav aria-label="Pagination" class="pagination-links">
+        {% if page_obj.has_previous %}
+          <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" class="btn btn-secondary btn-small">&larr; Previous</a>
+        {% endif %}
+        <span class="page-indicator">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}" class="btn btn-secondary btn-small">Next &rarr;</a>
+        {% endif %}
+      </nav>
+    </div>
+  {% else %}
+    <p class="empty-state">
+      {% if course_id or student_id or status or date_from or date_to %}
+        No attendance records match these filters. <a href="{% url 'students:attendance_list' %}">Clear filters</a>.
+      {% else %}
+        No attendance records yet. <a href="{% url 'students:attendance_bulk_mark' %}">Mark attendance</a>.
+      {% endif %}
+    </p>
+  {% endif %}
+</section>
+{% endblock %}

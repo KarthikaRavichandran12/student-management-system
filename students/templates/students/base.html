@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Student Management{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'students/style.css' %}">
+</head>
+<body>
+  {% if request.user.is_authenticated %}
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{% url 'students:dashboard' %}">
+        <span class="brand-mark">S</span>
+        <span>Student<span class="brand-accent">Hub</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="{% url 'students:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'students:student_list' %}" class="{% if 'student' in request.resolver_match.url_name and 'result' not in request.resolver_match.url_name %}active{% endif %}">Students</a>
+        <a href="{% url 'students:course_list' %}" class="{% if 'course' in request.resolver_match.url_name %}active{% endif %}">Courses</a>
+        <a href="{% url 'students:attendance_list' %}" class="{% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">Attendance</a>
+        <a href="{% url 'students:exam_list' %}" class="{% if 'exam' in request.resolver_match.url_name or 'mark' in request.resolver_match.url_name %}active{% endif %}">Exams</a>
+        <a href="{% url 'students:results_list' %}" class="{% if 'result' in request.resolver_match.url_name %}active{% endif %}">Results</a>
+      </nav>
+      <div class="user-actions">
+        <span class="username">{{ request.user.get_username }}</span>
+        <form method="post" action="{% url 'students:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-link btn-small">Log out</button>
+        </form>
+      </div>
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="container main-content">
+    {% if messages %}
+      <div class="messages" role="status">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Student Management System &middot; Built with Django</p>
+    </div>
+  </footer>
+</body>
+</html>

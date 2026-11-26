@@ -1,0 +1,54 @@
+{% extends "students/base.html" %}
+{% block title %}Enter marks for {{ exam.name }} - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Enter marks: {{ exam.name }}</h1>
+    <p class="page-subtitle">{{ exam.course.name }} &middot; {{ exam.exam_date|date:"F d, Y" }} &middot; Maximum {{ exam.max_marks }} marks</p>
+  </div>
+  <a href="{% url 'students:exam_results' exam.pk %}" class="btn btn-link">&larr; View results</a>
+</div>
+
+<section class="card">
+  {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}
+  {% endif %}
+  {% if rows %}
+    <p class="help">Leave a box empty to remove a previously recorded mark.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="table-responsive bulk-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Roll number</th>
+              <th>Marks obtained (out of {{ exam.max_marks }})</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td class="strong-cell"><a class="table-link" href="{% url 'students:student_results' row.student.pk %}">{{ row.student.name }}</a></td>
+                <td class="mono">{{ row.student.roll_number }}</td>
+                <td>
+                  <label class="sr-only" for="{{ row.marks.id_for_label }}">Marks for {{ row.student.name }}</label>
+                  {{ row.marks }}
+                  {% for error in row.marks.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save marks</button>
+        <a href="{% url 'students:exam_list' %}" class="btn btn-link">Cancel</a>
+      </div>
+    </form>
+  {% else %}
+    <p class="empty-state">No students are enrolled in this course. <a href="{% url 'students:student_create' %}">Add a student</a> before entering marks.</p>
+  {% endif %}
+</section>
+{% endblock %}

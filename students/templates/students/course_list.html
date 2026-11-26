@@ -1,0 +1,59 @@
+{% extends "students/base.html" %}
+{% block title %}Courses - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Courses</h1>
+    <p class="page-subtitle">Organise the courses your students belong to.</p>
+  </div>
+  <a href="{% url 'students:course_create' %}" class="btn btn-primary">+ Add course</a>
+</div>
+
+<section class="card">
+  <form method="get" class="filter-bar">
+    <div class="search-field">
+      <label for="q" class="sr-only">Search courses</label>
+      <input type="search" id="q" name="q" value="{{ query }}" placeholder="Search by course name or code">
+    </div>
+    <button type="submit" class="btn btn-secondary">Search</button>
+    {% if query %}<a href="{% url 'students:course_list' %}" class="btn btn-link">Clear</a>{% endif %}
+  </form>
+
+  {% if courses %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Code</th>
+            <th>Students</th>
+            <th>Description</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for course in courses %}
+            <tr>
+              <td class="strong-cell">{{ course.name }}</td>
+              <td><span class="course-tag">{{ course.code }}</span></td>
+              <td><span class="pill">{{ course.student_count }}</span></td>
+              <td class="description-cell">{{ course.description|truncatechars:70|default:"—" }}</td>
+              <td class="table-actions">
+                <a href="{% url 'students:student_list' %}?course={{ course.pk }}" class="btn-icon">Students</a>
+                <a href="{% url 'students:course_update' course.pk %}" class="btn-icon">Edit</a>
+                <a href="{% url 'students:course_delete' course.pk %}" class="btn-icon btn-icon-danger">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty-state">
+      {% if query %}No courses match your search. <a href="{% url 'students:course_list' %}">Clear search</a>.
+      {% else %}No courses yet. <a href="{% url 'students:course_create' %}">Add a course</a>.{% endif %}
+    </p>
+  {% endif %}
+</section>
+{% endblock %}

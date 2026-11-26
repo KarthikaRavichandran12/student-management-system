@@ -1,0 +1,31 @@
+{% extends "students/base.html" %}
+{% block title %}Delete {{ course.name }} - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Delete course</h1>
+    <p class="page-subtitle">This action cannot be undone.</p>
+  </div>
+</div>
+
+<section class="card confirm-card">
+  <div class="warning-icon">!</div>
+  <h2>Are you sure you want to delete {{ course.name }}?</h2>
+  {% if course.student_count %}
+    <p class="alert alert-error">
+      <strong>{{ course.student_count }} student{{ course.student_count|pluralize }}</strong>
+      enrolled in this course will also be deleted. Consider moving them to another course first.
+    </p>
+  {% else %}
+    <p>No students are enrolled in this course.</p>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger">Yes, delete course</button>
+      <a href="{% url 'students:course_list' %}" class="btn btn-link">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

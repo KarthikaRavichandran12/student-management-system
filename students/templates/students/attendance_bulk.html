@@ -1,0 +1,87 @@
+{% extends "students/base.html" %}
+{% block title %}Mark attendance - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Mark attendance</h1>
+    <p class="page-subtitle">Choose a course and date, then set a status for every student.</p>
+  </div>
+  <a href="{% url 'students:attendance_list' %}" class="btn btn-link">&larr; Back to attendance</a>
+</div>
+
+<section class="card">
+  <form method="get" class="filter-bar">
+    <div class="filter-field">
+      <label for="course" class="sr-only">Course</label>
+      <select id="course" name="course">
+        <option value="">Select a course</option>
+        {% for course in courses %}
+          <option value="{{ course.pk }}" {% if course_id == course.pk|stringformat:"s" %}selected{% endif %}>{{ course.name }} ({{ course.code }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="date" class="sr-only">Date</label>
+      <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+    </div>
+    <button type="submit" class="btn btn-secondary">Load students</button>
+  </form>
+
+  {% if not courses %}
+    <div class="alert alert-info">No courses exist yet. <a href="{% url 'students:course_create' %}">Add a course first</a>.</div>
+  {% elif not course %}
+    <p class="empty-state">Select a course above to see its students.</p>
+  {% else %}
+    {% if form.non_field_errors %}
+      {% for error in form.non_field_errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}
+    {% endif %}
+    {% for error in form.course.errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}
+    {% for error in form.date.errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}
+
+    <h2 class="section-title">{{ course.name }} &middot; {{ selected_date|date:"F d, Y" }}</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.course.as_hidden }}
+      {{ form.date.as_hidden }}
+      {% if rows %}
+        <div class="table-responsive bulk-table">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Roll number</th>
+                <th>Status</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <td class="strong-cell">{{ row.student.name }}</td>
+                  <td class="mono">{{ row.student.roll_number }}</td>
+                  <td>
+                    <label class="sr-only" for="{{ row.status.id_for_label }}">Status for {{ row.student.name }}</label>
+                    {{ row.status }}
+                    {% for error in row.status.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                  </td>
+                  <td>
+                    <label class="sr-only" for="{{ row.notes.id_for_label }}">Note for {{ row.student.name }}</label>
+                    {{ row.notes }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save attendance</button>
+          <a href="{% url 'students:attendance_list' %}" class="btn btn-link">Cancel</a>
+        </div>
+      {% else %}
+        <p class="empty-state">No students are enrolled in this course yet. <a href="{% url 'students:student_create' %}">Add a student</a>.</p>
+      {% endif %}
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

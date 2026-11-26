@@ -1,0 +1,60 @@
+{% extends "students/base.html" %}
+{% block title %}{{ student.name }} - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>{{ student.name }}</h1>
+    <p class="page-subtitle">{{ student.roll_number }} &middot; {{ student.course.name }}</p>
+  </div>
+  <div class="heading-actions">
+    <a href="{% url 'students:student_update' student.pk %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'students:student_delete' student.pk %}" class="btn btn-danger-outline">Delete</a>
+    <a href="{% url 'students:student_list' %}" class="btn btn-link">&larr; Back to list</a>
+  </div>
+</div>
+
+<section class="card detail-card">
+  <h2 class="section-title">Student details</h2>
+  <dl class="detail-grid">
+    <div><dt>Roll number</dt><dd class="mono">{{ student.roll_number }}</dd></div>
+    <div><dt>Course</dt><dd><a href="{% url 'students:course_list' %}">{{ student.course.name }} ({{ student.course.code }})</a></dd></div>
+    <div><dt>Email</dt><dd><a href="mailto:{{ student.email }}">{{ student.email }}</a></dd></div>
+    <div><dt>Phone</dt><dd>{{ student.phone|default:"—" }}</dd></div>
+    <div><dt>Date of birth</dt><dd>{{ student.date_of_birth|date:"F d, Y"|default:"—" }}</dd></div>
+    <div><dt>Address</dt><dd>{{ student.address|default:"—"|linebreaksbr }}</dd></div>
+    <div><dt>Added</dt><dd>{{ student.created_at|date:"F d, Y, P" }}</dd></div>
+    <div><dt>Last updated</dt><dd>{{ student.updated_at|date:"F d, Y, P" }}</dd></div>
+  </dl>
+</section>
+
+<div class="dashboard-grid detail-extras">
+  <section class="card">
+    <div class="card-header">
+      <h2>Attendance overview</h2>
+      <a href="{% url 'students:attendance_list' %}?student={{ student.pk }}" class="text-link">View records &rarr;</a>
+    </div>
+    <div class="summary-strip compact">
+      <div class="summary-item"><span>Days recorded</span><strong>{{ attendance.total }}</strong></div>
+      <div class="summary-item"><span>Present / late</span><strong>{{ attendance.present }}</strong></div>
+      <div class="summary-item"><span>Absent</span><strong>{{ attendance.absent }}</strong></div>
+      <div class="summary-item"><span>Attendance rate</span><strong>{{ attendance.percentage|floatformat:1|default:"—" }}{% if attendance.percentage %}%{% endif %}</strong></div>
+    </div>
+    <a href="{% url 'students:attendance_bulk_mark' %}?course={{ student.course_id }}" class="btn btn-secondary btn-small">Mark attendance</a>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>Academic results</h2>
+      <a href="{% url 'students:student_results' student.pk %}" class="text-link">Marksheet &rarr;</a>
+    </div>
+    <div class="summary-strip compact">
+      <div class="summary-item"><span>Exams recorded</span><strong>{{ marks|length }}</strong></div>
+      <div class="summary-item"><span>Marks</span><strong>{{ obtained_marks }} / {{ maximum_marks }}</strong></div>
+      <div class="summary-item"><span>Percentage</span><strong>{{ percentage|floatformat:1|default:"—" }}{% if percentage %}%{% endif %}</strong></div>
+      <div class="summary-item"><span>Grade</span><strong><span class="grade-badge">{{ grade }}</span></strong></div>
+    </div>
+    <a href="{% url 'students:mark_create' student.pk %}" class="btn btn-secondary btn-small">Add marks</a>
+  </section>
+</div>
+{% endblock %}

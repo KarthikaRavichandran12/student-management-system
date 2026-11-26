@@ -1,0 +1,87 @@
+{% extends "students/base.html" %}
+{% block title %}Results - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Results</h1>
+    <p class="page-subtitle">Overall performance across all recorded exams.</p>
+  </div>
+  <a href="{% url 'students:exam_list' %}" class="btn btn-secondary">Manage exams</a>
+</div>
+
+<section class="card">
+  <form method="get" class="filter-bar">
+    <div class="search-field">
+      <label for="q" class="sr-only">Search students</label>
+      <input type="search" id="q" name="q" value="{{ query }}" placeholder="Search by name or roll number">
+    </div>
+    <div class="filter-field">
+      <label for="course" class="sr-only">Filter by course</label>
+      <select id="course" name="course">
+        <option value="">All courses</option>
+        {% for course in courses %}
+          <option value="{{ course.pk }}" {% if course_id == course.pk|stringformat:"s" %}selected{% endif %}>{{ course.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    {% if query or course_id %}<a href="{% url 'students:results_list' %}" class="btn btn-link">Clear</a>{% endif %}
+  </form>
+
+  {% if rows %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Marks</th>
+            <th>Percentage</th>
+            <th>Grade</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td class="strong-cell">#{{ page_obj.start_index|add:forloop.counter0 }}</td>
+              <td><a class="table-link" href="{% url 'students:student_results' row.student.pk %}">{{ row.student.name }}</a><br><small class="mono">{{ row.student.roll_number }}</small></td>
+              <td><span class="course-tag">{{ row.student.course.code }}</span></td>
+              <td class="mono">{{ row.obtained }} / {{ row.maximum }}</td>
+              <td>{{ row.percentage|floatformat:1 }}%</td>
+              <td><span class="grade-badge">{{ row.grade }}</span></td>
+              <td class="table-actions"><a href="{% url 'students:student_results' row.student.pk %}" class="btn-icon">View marksheet</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <p class="pagination-info">
+        Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+      </p>
+      <nav aria-label="Pagination" class="pagination-links">
+        {% if page_obj.has_previous %}
+          <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" class="btn btn-secondary btn-small">&larr; Previous</a>
+        {% endif %}
+        <span class="page-indicator">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}" class="btn btn-secondary btn-small">Next &rarr;</a>
+        {% endif %}
+      </nav>
+    </div>
+    <p class="help">A passing result requires {{ pass_percentage }}% or above.</p>
+  {% else %}
+    <p class="empty-state">
+      {% if query or course_id %}
+        No results match these filters. <a href="{% url 'students:results_list' %}">Clear filters</a>.
+      {% else %}
+        No marks recorded yet. <a href="{% url 'students:exam_list' %}">Enter marks for an exam</a>.
+      {% endif %}
+    </p>
+  {% endif %}
+</section>
+{% endblock %}

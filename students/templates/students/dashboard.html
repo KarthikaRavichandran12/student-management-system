@@ -1,0 +1,90 @@
+{% extends "students/base.html" %}
+{% block title %}Dashboard - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="page-subtitle">A quick overview of your student records.</p>
+  </div>
+  <a href="{% url 'students:student_create' %}" class="btn btn-primary">+ Add student</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon icon-blue">S</div>
+    <div>
+      <p class="stat-label">Total students</p>
+      <p class="stat-value">{{ total_students }}</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-teal">C</div>
+    <div>
+      <p class="stat-label">Total courses</p>
+      <p class="stat-value">{{ total_courses }}</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-amber">+</div>
+    <div>
+      <p class="stat-label">Recent additions</p>
+      <p class="stat-value">{{ recent_students|length }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="card">
+    <div class="card-header">
+      <h2>Recently added students</h2>
+      <a href="{% url 'students:student_list' %}" class="text-link">View all &rarr;</a>
+    </div>
+    {% if recent_students %}
+      <ul class="activity-list">
+        {% for student in recent_students %}
+          <li>
+            <span class="avatar">{{ student.name|first|upper }}</span>
+            <span class="activity-info">
+              <a href="{% url 'students:student_detail' student.pk %}">{{ student.name }}</a>
+              <small>{{ student.roll_number }} &middot; {{ student.course.name }}</small>
+            </span>
+            <time>{{ student.created_at|date:"M d, Y" }}</time>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">No students yet. <a href="{% url 'students:student_create' %}">Add the first one</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>Courses</h2>
+      <a href="{% url 'students:course_list' %}" class="text-link">Manage &rarr;</a>
+    </div>
+    {% if courses %}
+      <ul class="course-summary">
+        {% for course in courses %}
+          <li>
+            <span class="course-code">{{ course.code }}</span>
+            <span class="course-name">{{ course.name }}</span>
+            <span class="pill">{{ course.student_count }} student{{ course.student_count|pluralize }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">No courses yet. <a href="{% url 'students:course_create' %}">Create one</a>.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card quick-links">
+  <div class="card-header"><h2>Quick links</h2></div>
+  <div class="quick-link-grid">
+    <a href="{% url 'students:attendance_bulk_mark' %}"><strong>Mark attendance</strong><span>Record a full class in one go</span></a>
+    <a href="{% url 'students:exam_list' %}"><strong>Exams &amp; marks</strong><span>Create exams and enter scores</span></a>
+    <a href="{% url 'students:results_list' %}"><strong>Results</strong><span>Review grades and rankings</span></a>
+  </div>
+</section>
+{% endblock %}

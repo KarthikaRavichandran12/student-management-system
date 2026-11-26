@@ -1,0 +1,23 @@
+{% extends "students/base.html" %}
+{% block title %}Delete marks - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Delete marks</h1>
+    <p class="page-subtitle">This action cannot be undone.</p>
+  </div>
+</div>
+
+<section class="card confirm-card">
+  <div class="warning-icon">!</div>
+  <h2>Delete {{ mark.marks_obtained }} marks for {{ mark.student.name }} in {{ mark.exam.name }}?</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger">Yes, delete marks</button>
+      <a href="{% url 'students:student_results' mark.student_id %}" class="btn btn-link">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

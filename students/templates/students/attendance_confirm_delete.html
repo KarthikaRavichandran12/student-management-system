@@ -1,0 +1,23 @@
+{% extends "students/base.html" %}
+{% block title %}Delete attendance record - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Delete attendance record</h1>
+    <p class="page-subtitle">This action cannot be undone.</p>
+  </div>
+</div>
+
+<section class="card confirm-card">
+  <div class="warning-icon">!</div>
+  <h2>Delete the {{ record.get_status_display|lower }} record for {{ record.student.name }} on {{ record.date|date:"M d, Y" }}?</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger">Yes, delete record</button>
+      <a href="{% url 'students:attendance_list' %}" class="btn btn-link">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

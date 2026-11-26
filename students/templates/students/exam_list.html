@@ -1,0 +1,77 @@
+{% extends "students/base.html" %}
+{% block title %}Exams - Student Management{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Exams &amp; marks</h1>
+    <p class="page-subtitle">Create exams, enter marks and review results.</p>
+  </div>
+  <div class="heading-actions">
+    <a href="{% url 'students:exam_create' %}" class="btn btn-primary">+ Add exam</a>
+    <a href="{% url 'students:results_list' %}" class="btn btn-secondary">View results</a>
+  </div>
+</div>
+
+<section class="card">
+  <form method="get" class="filter-bar">
+    <div class="search-field">
+      <label for="q" class="sr-only">Search exams</label>
+      <input type="search" id="q" name="q" value="{{ query }}" placeholder="Search by exam or course name">
+    </div>
+    <div class="filter-field">
+      <label for="course" class="sr-only">Filter by course</label>
+      <select id="course" name="course">
+        <option value="">All courses</option>
+        {% for course in courses %}
+          <option value="{{ course.pk }}" {% if course_id == course.pk|stringformat:"s" %}selected{% endif %}>{{ course.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    {% if query or course_id %}<a href="{% url 'students:exam_list' %}" class="btn btn-link">Clear</a>{% endif %}
+  </form>
+
+  {% if exams %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Exam</th>
+            <th>Course</th>
+            <th>Date</th>
+            <th>Maximum marks</th>
+            <th>Marks recorded</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exam in exams %}
+            <tr>
+              <td class="strong-cell">{{ exam.name }}</td>
+              <td><span class="course-tag">{{ exam.course.code }}</span> {{ exam.course.name }}</td>
+              <td>{{ exam.exam_date|date:"M d, Y" }}</td>
+              <td class="mono">{{ exam.max_marks }}</td>
+              <td><span class="pill">{{ exam.marks_count }} / {{ exam.students_enrolled }}</span></td>
+              <td class="table-actions">
+                <a href="{% url 'students:marks_entry' exam.pk %}" class="btn-icon">Enter marks</a>
+                <a href="{% url 'students:exam_results' exam.pk %}" class="btn-icon">Results</a>
+                <a href="{% url 'students:exam_update' exam.pk %}" class="btn-icon">Edit</a>
+                <a href="{% url 'students:exam_delete' exam.pk %}" class="btn-icon btn-icon-danger">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty-state">
+      {% if query or course_id %}
+        No exams match these filters. <a href="{% url 'students:exam_list' %}">Clear filters</a>.
+      {% else %}
+        No exams yet. <a href="{% url 'students:exam_create' %}">Add the first exam</a>.
+      {% endif %}
+    </p>
+  {% endif %}
+</section>
+{% endblock %}
